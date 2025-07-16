@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { Accomodations } from '../../hooks/AccomServices'; 
+import { Accomodations } from '../../hooks/AccomServices';
 
 const Container = styled.section`  
     margin: 2.5rem 5rem;
@@ -39,12 +39,29 @@ export default function SeeAccom() { //muestra los alojamientos disponibles
             <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Neque, blanditiis.</p>
             <section>
                 {accomList.map((item) => ( //Mostrando datos: id, name, description y address
-                    <div key={item.id}>
-                        <h4>{item.name}</h4>
-                        <p><b>Descripción:</b> {item.description}</p>
-                        <p><b>Dirección:</b> {item.address}</p>
-                        <Link to={`/accommodation/${item.id}`}>Editar Alojamiento</Link>
-                    </div>
+                    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                        {accomList.map((item) => (
+                            <div
+                                key={item.id}
+                                className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-lg transition duration-300"
+                            >
+                                <h4 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h4>
+                                <p className="text-gray-600 mb-1">
+                                    <span className="font-medium text-gray-700">Descripción:</span> {item.description}
+                                </p>
+                                <p className="text-gray-600 mb-4">
+                                    <span className="font-medium text-gray-700">Dirección:</span> {item.address}
+                                </p>
+                                <Link
+                                    to={`/Accom/edit/${item.id}`}
+                                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                >
+                                    Editar Alojamiento
+                                </Link>
+                            </div>
+                        ))}
+                    </section>
+
                 ))}
             </section>
         </Container>

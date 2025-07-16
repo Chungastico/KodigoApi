@@ -22,7 +22,7 @@ function App() {
             <Route path="/reservations" element={<ReservationsView />} />
             {/* Rutas para alojamientos */}
             <Route path='/Accom' element={<SeeAccom/>}/> {/*ver alojamientos */}
-            <Route path='/Accom/edit' element={<EditAccom/>}/>{/*editar alojamientos */}
+            <Route path='/Accom/edit/:id' element={<EditAccom/>}/>{/*editar alojamientos */}
             <Route path='/Accom/register' element={<RegisterAccom/>}/>{/*registrar un nuevo alojamientos */}
         </Routes>
     );
