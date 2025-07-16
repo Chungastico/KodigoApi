@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Accomodations from "../../hooks/AccomServices";
+
 
 export default function EditAccom() { //edita la informacion sobre los alojamientos disponibles
     const { register, handleSubmit, setValue } = useForm();
     const { id } = useParams();
-    const navigate = useNavigate();
+    const [updateSuccess, setUpdateSuccess] = useState(false);
+
 
     const [accomList, setAccomList] = useState([]);
 
@@ -38,20 +40,28 @@ export default function EditAccom() { //edita la informacion sobre los alojamien
         try {
             const updated = await Accomodations.updateAccomodation(data, id);
             console.log("Alojamiento actualizado:", updated);
-            navigate("/Accom"); // redirige al listado
+            setUpdateSuccess(true); // activa la alerta
+
+            setTimeout(() => {
+                navigate("/Accom"); // redirige después de unos segundos
+            }, 1500); // 1.5 segundos de espera
         } catch (error) {
             console.error("Error al actualizar:", error);
         }
     };
-
     const handleLinkClick = () => {
-        handleSubmit(saveData)(); // dispara submit manual con react-hook-form
+        handleSubmit(saveData)();
     };
-
     return (
         <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-200">
             <h1 className="text-2xl font-bold mb-6 text-blue-700">Edita tu Alojamiento!!</h1>
-            <form className="space-y-4">
+            {updateSuccess && (
+                <div className="bg-green-100 text-green-800 p-3 rounded-md mb-4 border border-green-300 text-center animate-fade">
+                    Alojamiento actualizado con éxito.
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit(saveData)} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Id</label>
                     <input
@@ -86,15 +96,14 @@ export default function EditAccom() { //edita la informacion sobre los alojamien
                     />
                 </div>
 
-                <div className="text-center pt-4">
-                    <Link
-                        to="#"
-                        onClick={handleLinkClick}
-                        className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                    >
-                        Guardar Cambios
-                    </Link>
+                <div className="pt-2">
+                    <input
+                        type="submit"
+                        value="Guardar Datos"
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+                    />
                 </div>
+
             </form>
         </div>
     );
