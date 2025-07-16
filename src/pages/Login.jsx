@@ -12,6 +12,7 @@ const Login = () => {
             const res = await axios.post('/login', data);
             localStorage.setItem('token', res.data.token);
             navigate('/bookings');
+            console.log(res)
         } catch (err) {
             alert('Login incorrecto. Verifica tus credenciales.');
             console.error(err);

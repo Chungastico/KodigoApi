@@ -3,6 +3,8 @@ import BookingsList from './pages/Bookings/BookingsList';
 import BookingForm from './pages/Bookings/BookingsForm';
 import Login from './pages/Login';
 
+import ReservationsView from './pages/ReservationsView';
+
 function App() {
     return (
         <Routes>
@@ -10,6 +12,7 @@ function App() {
             <Route path="/bookings" element={<BookingsList />} />
             <Route path="/bookings/new" element={<BookingForm />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reservations" element={<ReservationsView />}/>
         </Routes>
     );
 }
