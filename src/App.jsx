@@ -1,29 +1,27 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+// src/App.jsx
+import { Routes, Route } from 'react-router-dom';
 import BookingsList from './pages/Bookings/BookingsList';
 import BookingForm from './pages/Bookings/BookingsForm';
 import Login from './pages/Login';
-EditAccom
-RegisterAccom
-SeeAccom
 import ReservationsView from './pages/ReservationsView';
 import EditAccom from './pages/Accomodations/EditAccom';
 import RegisterAccom from './pages/Accomodations/RegisterAccom';
 import SeeAccom from './pages/Accomodations/Accomodations';
-import styled from "styled-components";
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     return (
-
         <Routes>
+            {/* Ruta pública */}
             <Route path="/" element={<Login />} />
-            <Route path="/bookings" element={<BookingsList />} />
-            <Route path="/bookings/new" element={<BookingForm />} />
-            <Route path="/reservations" element={<ReservationsView />} />
-            {/* Rutas para alojamientos */}
-            <Route path='/Accom' element={<SeeAccom/>}/> {/*ver alojamientos */}
-            <Route path='/Accom/edit/:id' element={<EditAccom/>}/>{/*editar alojamientos */}
-            <Route path='/Accom/register' element={<RegisterAccom/>}/>{/*registrar un nuevo alojamientos */}
+
+            {/* Rutas protegidas */}
+            <Route path="/bookings" element={<ProtectedRoute><BookingsList /></ProtectedRoute>} />
+            <Route path="/bookings/register" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><ReservationsView /></ProtectedRoute>} />
+            <Route path="/Accom" element={<ProtectedRoute><SeeAccom /></ProtectedRoute>} />
+            <Route path="/Accom/edit/:id" element={<ProtectedRoute><EditAccom /></ProtectedRoute>} />
+            <Route path="/Accom/register" element={<ProtectedRoute><RegisterAccom /></ProtectedRoute>} />
         </Routes>
     );
 }

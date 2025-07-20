@@ -1,14 +1,15 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import Accomodations from '../../hooks/AccomServices'
+import { useNavigate } from 'react-router-dom';
+import Accomodations from '../../hooks/AccomServices';
+import { FaArrowLeft } from 'react-icons/fa';
 
-export default function RegisterAccom() { //registra un nuevo alojamiento
-
+export default function RegisterAccom() {
     const { register, handleSubmit, reset } = useForm();
-
+    const navigate = useNavigate();
 
     const saveData = async (data) => {
-        console.log("Datos enviados al backend:", data); // verifica los datos
+        console.log("Datos enviados al backend:", data);
 
         const response = await Accomodations.createAccomodation(data);
         if (data?.name && data?.address) {
@@ -20,46 +21,69 @@ export default function RegisterAccom() { //registra un nuevo alojamiento
         }
     };
 
-
-
     return (
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-200">
-            <h1 className="text-2xl font-bold mb-6 text-blue-700">Registrar nuevo alojamiento!!</h1>
+        <div className="min-h-screen bg-amber-900 flex items-center justify-center px-4 py-10">
+            <div className="w-full max-w-xl bg-white rounded-xl shadow-md p-8 border border-stone-300 relative">
+                {/* Botón de regreso */}
+                <button
+                    onClick={() => navigate('/Accom')}
+                    className="absolute -top-4 left-4 bg-yellow-600 hover:bg-yellow-700 text-white text-sm px-3 py-1.5 rounded flex items-center gap-2 shadow"
+                >
+                    <FaArrowLeft size={14} />
+                    Volver
+                </button>
 
-            <form onSubmit={handleSubmit(saveData)} className="space-y-4"> {/* Formulario para registrar un nuevo alojamiento */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                    <input
-                        type="text"
-                        {...register('name')}
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                    <input
-                        type="text"
-                        {...register('description')}
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Dirección</label>
-                    <input
-                        type="text"
-                        {...register('address')}
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-                <div className="pt-2">
-                    <input
-                        type="submit"
-                        value="Guardar Datos"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
-                    />
-                </div>
-            </form>
+                <h1 className="text-2xl font-bold mb-6 text-zinc-900 text-center mt-2">
+                    Registrar nuevo alojamiento
+                </h1>
+
+                <form onSubmit={handleSubmit(saveData)} className="space-y-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-zinc-900 mb-1">
+                            Nombre
+                        </label>
+                        <input
+                            type="text"
+                            {...register('name')}
+                            placeholder="Nombre del alojamiento"
+                            className="w-full px-4 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-zinc-900 mb-1">
+                            Descripción
+                        </label>
+                        <input
+                            type="text"
+                            {...register('description')}
+                            placeholder="Descripción breve"
+                            className="w-full px-4 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-zinc-900 mb-1">
+                            Dirección
+                        </label>
+                        <input
+                            type="text"
+                            {...register('address')}
+                            placeholder="Dirección completa"
+                            className="w-full px-4 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600"
+                        />
+                    </div>
+
+                    <div>
+                        <button
+                            type="submit"
+                            className="w-full bg-yellow-600 text-white py-2 rounded-md font-semibold hover:bg-yellow-700 transition"
+                        >
+                            Guardar Datos
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
     );
 }

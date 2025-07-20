@@ -1,31 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
-import { Accomodations } from '../../hooks/AccomServices';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Accomodations } from "../../hooks/AccomServices";
+import Layout from "../../components/layout.jsx";
+import { Pencil, Trash2 } from "lucide-react";
 
-const Container = styled.section`  
-    margin: 2.5rem 5rem;
-    font-family: Tahoma, Geneva, Verdana, sans-serif;
-`;
-const Title = styled.h1`
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 0.2rem;
-`;
-
-export default function SeeAccom() { //muestra los alojamientos disponibles 
+const SeeAccom = () => {
     const [accomList, setAccomList] = useState([]);
 
-    // trae los alojamientos reales desde la API
     const fetchData = async () => {
         const data = await Accomodations.getAccomodations();
-        console.log(data); // verifica que tenga name, description y address
 
         if (Array.isArray(data)) {
             setAccomList(data);
         } else {
             console.warn("La respuesta de getAccomodations no es una lista:", data);
-            setAccomList([]); // evita errores de map si data no es válida
+            setAccomList([]);
         }
     };
 
@@ -33,37 +22,57 @@ export default function SeeAccom() { //muestra los alojamientos disponibles
         fetchData();
     }, []);
 
-    return (
-        <Container>
-            <Title>¡Últimos Alojamientos Disponibles!</Title>
-            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Neque, blanditiis.</p>
-            <section>
-                {accomList.map((item) => ( //Mostrando datos: id, name, description y address
-                    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                        {accomList.map((item) => (
-                            <div
-                                key={item.id}
-                                className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-lg transition duration-300"
-                            >
-                                <h4 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h4>
-                                <p className="text-gray-600 mb-1">
-                                    <span className="font-medium text-gray-700">Descripción:</span> {item.description}
-                                </p>
-                                <p className="text-gray-600 mb-4">
-                                    <span className="font-medium text-gray-700">Dirección:</span> {item.address}
-                                </p>
-                                <Link
-                                    to={`/Accom/edit/${item.id}`}
-                                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                                >
-                                    Editar Alojamiento
-                                </Link>
-                            </div>
-                        ))}
-                    </section>
+    const handleDelete = async (id) => {
+        const confirmDelete = confirm("¿Estás seguro de eliminar este alojamiento?");
+        if (!confirmDelete) return;
 
+        try {
+            await Accomodations.deleteAccomodation(id);
+            setAccomList(accomList.filter((a) => a.id !== id));
+            alert("Alojamiento eliminado con éxito.");
+        } catch (err) {
+            console.error("Error al eliminar alojamiento:", err);
+            alert("No se pudo eliminar el alojamiento.");
+        }
+    };
+
+    return (
+        <Layout>
+            <h2 className="text-2xl font-bold mb-4 text-zinc-800">Alojamientos</h2>
+            <div className="grid gap-4">
+                {accomList.map((item) => (
+                    <div
+                        key={item.id}
+                        className="bg-white rounded-xl shadow p-4 border flex justify-between items-start"
+                    >
+                        <div>
+                            <p className="text-sm"><strong>ID:</strong> {item.id}</p>
+                            <p className="text-sm"><strong>Nombre:</strong> {item.name || "N/A"}</p>
+                            <p className="text-sm"><strong>Descripción:</strong> {item.description || "N/A"}</p>
+                            <p className="text-sm"><strong>Dirección:</strong> {item.address || "N/A"}</p>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Link
+                                to={`/Accom/edit/${item.id}`}
+                                className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition"
+                                title="Editar"
+                            >
+                                <Pencil size={18} />
+                            </Link>
+                            <button
+                                onClick={() => handleDelete(item.id)}
+                                className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 transition"
+                                title="Eliminar"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
                 ))}
-            </section>
-        </Container>
+            </div>
+        </Layout>
     );
-}
+};
+
+export default SeeAccom;
