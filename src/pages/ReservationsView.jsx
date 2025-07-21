@@ -16,63 +16,62 @@ export default function ReservationsView() {
         },
     ]);
 
-    const [roomType, setRoomType] = useState("Standard Room");
-    const [guests, setGuests] = useState(1);
-    const [email, setEmail] = useState("");
-    const [bookedRanges, setBookedRanges] = useState([]);
     const [accommodations, setAccommodations] = useState([]);
     const [selectedAccommodation, setSelectedAccommodation] = useState("");
-
+    const [bookedRanges, setBookedRanges] = useState([]);
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
 
     useEffect(() => {
-        const fetchAccommodations = async () => {
-            try {
-                const res = await axios.get(
-                    "https://apibookingsaccomodations-production.up.railway.app/api/V1/accomodations",
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                setAccommodations(res.data);
-            } catch (err) {
-                console.error("Error cargando alojamientos", err);
-                alert("Error cargando alojamientos. Inicia sesión nuevamente.");
-                navigate("/login");
-            }
-        };
-
-        if (token) fetchAccommodations();
-        else {
+        if (!token) {
             alert("Sesión no encontrada. Inicia sesión nuevamente.");
             navigate("/login");
+            return;
         }
-    }, [token, navigate]);
 
-    useEffect(() => {
-        const fetchBookings = async () => {
+        const fetchData = async () => {
             try {
-                const res = await axios.get(
-                    "https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings",
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                const ranges = res.data.map((item) => ({
-                    start: new Date(item.start),
-                    end: new Date(item.end),
+                const [accRes, bookRes] = await Promise.all([
+                    axios.get("https://apibookingsaccomodations-production.up.railway.app/api/V1/accomodations", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    axios.get("https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
+
+                setAccommodations(accRes.data);
+                const ranges = bookRes.data.map((item) => ({
+                    start: new Date(item.check_in_date),
+                    end: new Date(item.check_out_date),
                 }));
                 setBookedRanges(ranges);
-            } catch (error) {
-                console.error("Error cargando reservas:", error);
-                alert("Error cargando reservas. Inicia sesión nuevamente.");
+            } catch (err) {
+                console.error("Error cargando datos:", err);
+                alert("Error cargando datos. Inicia sesión nuevamente.");
                 navigate("/login");
             }
         };
 
-        if (token) fetchBookings();
+        fetchData();
     }, [token, navigate]);
 
     const isDayBlocked = (date) => {
         return bookedRanges.some((range) =>
             isWithinInterval(date, { start: range.start, end: range.end })
+        );
+    };
+
+    const renderDayContent = (day) => {
+        const blocked = isDayBlocked(day);
+        return (
+            <div
+                className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                    blocked ? "bg-amber-800 text-white font-bold" : ""
+                }`}
+            >
+                {day.getDate()}
+            </div>
         );
     };
 
@@ -82,14 +81,18 @@ export default function ReservationsView() {
             return;
         }
 
-        const days = Math.ceil((state[0].endDate - state[0].startDate) / (1000 * 60 * 60 * 24)) || 1;
+        const days =
+            Math.ceil(
+                (state[0].endDate - state[0].startDate) / (1000 * 60 * 60 * 24)
+            ) || 1;
 
         const data = {
             accomodation_id: selectedAccommodation,
-            booking: "pending",
+            booking: "BK-" + Math.floor(Math.random() * 100000),
             check_in_date: format(state[0].startDate, "yyyy-MM-dd"),
             check_out_date: format(state[0].endDate, "yyyy-MM-dd"),
             total_amount: days * 100,
+            user_id: 1, // O usa el ID real si lo tienes disponible
         };
 
         try {
@@ -106,13 +109,29 @@ export default function ReservationsView() {
         }
     };
 
+    useEffect(() => {
+        const style = document.createElement("style");
+        style.innerHTML = `
+            .rdrCalendarWrapper {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            .rdrMonths {
+                display: flex !important;
+                gap: 2rem;
+            }
+            .rdrMonth {
+                width: 100% !important;
+            }
+        `;
+        document.head.appendChild(style);
+        return () => document.head.removeChild(style);
+    }, []);
+
     return (
         <Layout>
-            <h2 className="text-2xl font-bold mb-6 text-zinc-800">Reservar Alojamiento</h2>
-
-            <div className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl">
-                {/* Calendario */}
-                <div className="bg-white rounded-xl shadow-md p-6 border border-stone-300">
+            <div className="w-full max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-md border border-stone-300">
+                <div className="mb-6">
                     <DateRange
                         editableDateInputs={true}
                         onChange={(item) => setState([item.selection])}
@@ -120,55 +139,21 @@ export default function ReservationsView() {
                         ranges={state}
                         rangeColors={["#facc15"]}
                         minDate={new Date()}
-                        disabledDay={(date) => isDayBlocked(date)}
+                        months={2}
+                        direction="horizontal"
+                        dayContentRenderer={renderDayContent}
+                        className="w-full"
                     />
                 </div>
 
-                {/* Formulario */}
-                <div className="bg-white rounded-xl shadow-md p-6 border border-stone-300 w-full max-w-md">
-                    <h2 className="text-xl font-bold text-zinc-900 mb-4">Detalles de la Reserva</h2>
-
-                    <label className="block text-sm font-semibold text-zinc-900 mb-1">Tipo de habitación</label>
-                    <div className="flex gap-2 mb-4 flex-wrap">
-                        {["Standard Room", "Deluxe Room", "Suite"].map((type) => (
-                            <button
-                                key={type}
-                                onClick={() => setRoomType(type)}
-                                className={`px-4 py-2 rounded border text-sm transition ${
-                                    roomType === type
-                                        ? "bg-yellow-600 text-white border-yellow-600"
-                                        : "bg-white text-zinc-800 border-stone-300 hover:bg-stone-100"
-                                }`}
-                            >
-                                {type}
-                            </button>
-                        ))}
-                    </div>
-
-                    <label className="block text-sm font-semibold text-zinc-900 mb-1">Huéspedes</label>
-                    <input
-                        type="number"
-                        min="1"
-                        value={guests}
-                        onChange={(e) => setGuests(e.target.value)}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-600"
-                        placeholder="Número de huéspedes"
-                    />
-
-                    <label className="block text-sm font-semibold text-zinc-900 mb-1">Correo electrónico</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-600"
-                        placeholder="you@example.com"
-                    />
-
-                    <label className="block text-sm font-semibold text-zinc-900 mb-1">Alojamiento</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-zinc-900 mb-1">
+                        Alojamiento
+                    </label>
                     <select
                         value={selectedAccommodation}
                         onChange={(e) => setSelectedAccommodation(e.target.value)}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md mb-6 focus:outline-none focus:ring-2 focus:ring-yellow-600"
+                        className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600"
                     >
                         <option value="">Selecciona un alojamiento</option>
                         {accommodations.map((acc) => (
@@ -177,14 +162,14 @@ export default function ReservationsView() {
                             </option>
                         ))}
                     </select>
-
-                    <button
-                        onClick={handleSubmit}
-                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 rounded-md transition"
-                    >
-                        Reservar ahora
-                    </button>
                 </div>
+
+                <button
+                    onClick={handleSubmit}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 rounded-md transition"
+                >
+                    Reservar ahora
+                </button>
             </div>
         </Layout>
     );

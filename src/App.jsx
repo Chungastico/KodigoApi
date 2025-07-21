@@ -7,6 +7,7 @@ import ReservationsView from './pages/ReservationsView';
 import EditAccom from './pages/Accomodations/EditAccom';
 import RegisterAccom from './pages/Accomodations/RegisterAccom';
 import SeeAccom from './pages/Accomodations/Accomodations';
+import BookingEdit from './pages/Bookings/BookingEdit';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route path="/Accom" element={<ProtectedRoute><SeeAccom /></ProtectedRoute>} />
             <Route path="/Accom/edit/:id" element={<ProtectedRoute><EditAccom /></ProtectedRoute>} />
             <Route path="/Accom/register" element={<ProtectedRoute><RegisterAccom /></ProtectedRoute>} />
+            <Route path="/bookings/edit/:id" element={<ProtectedRoute><BookingEdit /></ProtectedRoute>} />
         </Routes>
     );
 }

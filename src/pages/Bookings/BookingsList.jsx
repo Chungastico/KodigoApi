@@ -31,21 +31,6 @@ const BookingsList = () => {
         navigate(`/bookings/edit/${id}`);
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm("¿Estás seguro de eliminar esta reserva?")) return;
-
-        try {
-            await axios.delete(
-                `https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings/${id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setBookings(bookings.filter((b) => b.id !== id));
-        } catch (err) {
-            console.error("Error al eliminar reserva:", err);
-            alert("No se pudo eliminar la reserva.");
-        }
-    };
-
     return (
         <Layout>
             <h2 className="text-2xl font-bold mb-4 text-zinc-800">Reservas</h2>
@@ -57,9 +42,10 @@ const BookingsList = () => {
                     >
                         <div>
                             <p className="text-sm"><strong>ID:</strong> {booking.id}</p>
-                            <p className="text-sm"><strong>Cliente:</strong> {booking.user_name || "N/A"}</p>
-                            <p className="text-sm"><strong>Alojamiento:</strong> {booking.accomodation_name || "N/A"}</p>
+                            <p className="text-sm"><strong>Cliente:</strong> {booking.user || "N/A"}</p>
+                            <p className="text-sm"><strong>Alojamiento:</strong> {booking.accomodation || "N/A"}</p>
                             <p className="text-sm"><strong>Fecha:</strong> {booking.check_in_date} - {booking.check_out_date}</p>
+                            <p className="text-sm"><strong>Estado:</strong> {booking.status}</p>
                         </div>
 
                         <div className="flex gap-2">
@@ -69,13 +55,6 @@ const BookingsList = () => {
                                 title="Editar"
                             >
                                 <Pencil size={18} />
-                            </button>
-                            <button
-                                onClick={() => handleDelete(booking.id)}
-                                className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 transition"
-                                title="Eliminar"
-                            >
-                                <Trash2 size={18} />
                             </button>
                         </div>
                     </div>
