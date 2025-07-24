@@ -19,6 +19,11 @@ export default function ReservationsView() {
     const [accommodations, setAccommodations] = useState([]);
     const [selectedAccommodation, setSelectedAccommodation] = useState("");
     const [bookedRanges, setBookedRanges] = useState([]);
+    const [reservaLista, setReservaLista] = useState(() => {
+        const guardadas = localStorage.getItem("reservasGuardadas");
+        return guardadas ? JSON.parse(guardadas) : [];
+    });
+
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
 
@@ -86,11 +91,23 @@ export default function ReservationsView() {
                 (state[0].endDate - state[0].startDate) / (1000 * 60 * 60 * 24)
             ) || 1;
 
+        const nuevaReserva = {
+            check_in: format(state[0].startDate, "yyyy-MM-dd"),
+            check_out: format(state[0].endDate, "yyyy-MM-dd"),
+            alojamiento:
+                accommodations.find((acc) => acc.id === parseInt(selectedAccommodation))?.name ||
+                "Sin nombre",
+        };
+
+        const actualizadas = [...reservaLista, nuevaReserva];
+        setReservaLista(actualizadas);
+        localStorage.setItem("reservasGuardadas", JSON.stringify(actualizadas));
+
         const data = {
             accomodation_id: selectedAccommodation,
             booking: "BK-" + Math.floor(Math.random() * 100000),
-            check_in_date: format(state[0].startDate, "yyyy-MM-dd"),
-            check_out_date: format(state[0].endDate, "yyyy-MM-dd"),
+            check_in_date: nuevaReserva.check_in,
+            check_out_date: nuevaReserva.check_out,
             total_amount: days * 100,
             user_id: 1, // O usa el ID real si lo tienes disponible
         };
@@ -105,7 +122,10 @@ export default function ReservationsView() {
             navigate("/bookings");
         } catch (error) {
             console.error("Error al crear la reserva:", error);
-            alert("Error al crear la reserva: " + JSON.stringify(error.response?.data?.errors || error.message));
+            alert(
+                "Error al crear la reserva: " +
+                    JSON.stringify(error.response?.data?.errors || error.message)
+            );
         }
     };
 
@@ -170,6 +190,17 @@ export default function ReservationsView() {
                 >
                     Reservar ahora
                 </button>
+
+                <div className="mt-6">
+                    <h3 className="text-md font-semibold mb-2">Reservas guardadas:</h3>
+                    <ul className="list-disc list-inside text-gray-800">
+                        {reservaLista.map((item, index) => (
+                            <li key={index}>
+                                {item.check_in} → {item.check_out} | {item.alojamiento}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </Layout>
     );
